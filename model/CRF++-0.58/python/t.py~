@@ -1,0 +1,30 @@
+#!/usr/bin/ruby
+
+import CRFPP
+
+try:
+    # -v 3: access deep information like alpha,beta,prob
+    # -nN: enable nbest output. N should be >= 2
+    tagger = CRFPP.Tagger("-m model -v 3 -n2")
+
+    # clear internal context
+    tagger.clear()
+    #query = raw_input("input your query \n")
+    query = "I want to book a flight from New York to Beijing at 8 pm tommrrow ."
+    context = query.split(" ")
+    # add context
+    for c in context:
+        tagger.add(c)
+    # parse and change internal stated as 'parsed'
+    tagger.parse()
+
+    size = tagger.size()
+    xsize = tagger.xsize()
+    for i in range(size):
+        for j in range(xsize):
+            print tagger.x(i, j) , "\t",
+        print tagger.y2(i) , "\n",
+
+
+except RuntimeError, e:
+    print "RuntimeError: ", e,

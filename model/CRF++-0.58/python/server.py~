@@ -1,0 +1,31 @@
+#!flask/bin/python
+from flask import Flask,request,jsonify,render_template
+import CRFPP
+
+app = Flask(__name__)
+tagger = CRFPP.Tagger("-m model -v3")
+
+@app.route('/',methods=["GET"])
+def index():
+    return render_template("index.html")
+    
+@app.route('/api/nlu',methods=["POST"])
+def crfpp():
+    query = request.values.get("query")
+    query = query.encode("utf-8")  
+    context = query.split(" ")
+    tagger.clear()
+    for c in context:
+        tagger.add(c)
+    tagger.parse()
+    result = {}
+    result["query"] = context
+    label = []
+    size = tagger.size()
+    for i in range(size):
+        label.append(tagger.y2(i))
+    result["label"] = label
+    return jsonify({'result': result})
+
+if __name__ == '__main__':
+    app.run(debug=True,port=8000,host="0.0.0.0")
