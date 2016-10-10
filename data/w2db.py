@@ -1,9 +1,11 @@
 #encoding=utf-8
 import pymongo
 import random
+import jieba
 
 conn = pymongo.MongoClient('localhost',27017)
 db = conn['competition']
+jieba.load_userdict("userdict.txt")
 
 def insert_label():
 	LabelCol = db["label"]
@@ -76,14 +78,59 @@ def split_data():
 	return train,valid
 
 def build_data():
+	#format: id,view,content,opnion
 	train,valid = split_data()
 	T = db["T"]
 	V = db["V"]
 	TrainCol = db["train"]
+	LabelCol = db["label"]
 	data = TrainCol.find()
 	for d in data:
 		id = d["id"]
+		content = d["content"]
+		# tokenization of content
+		content = list(jieba.cut(content))
+		d["content"] = content
+		view = []
+		opinion = []
+		labels = LabelCol.find({"id":id})
+		if labels:
+			for label in labels:
+				view.append(label["view"])
+				opinion.append(label["opinion"])
+		d["view"] = view
+		d["opinion"] = opinion
 		if id in train:
 			T.insert(d)
 		else:
 			V.insert(d)
+
+def build_train_data():
+	#format: id,view,content,opnion
+	TrainCol = db["train"]
+	LabelCol = db["label"]
+	data = list(TrainCol.find())
+	for d in data:
+		id = d["id"]
+		content = d["content"]
+		# tokenization of content
+		_content = list(jieba.cut(content))
+		d["content"] = _content
+		view = []
+		opinion = []
+		labels = LabelCol.find({"id":id})
+		if labels:
+			for label in labels:
+				view.append(label["view"])
+				opinion.append(label["opinion"])
+		d["view"] = view
+		d["opinion"] = opinion
+		TrainCol.save(d)
+
+
+# build_train_data()
+# insert_view()
+# insert_train()
+# insert_test()
+# insert_label()
+# build_data()

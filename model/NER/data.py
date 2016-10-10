@@ -6,7 +6,7 @@ import jieba.posseg as pseg
 conn = pymongo.MongoClient('localhost',27017)
 db = conn['competition']
 
-def build_crf_data(filename="T.data",_type="T"):
+def build_crf_data(filename="train/T.data",_type="T"):
 	# format: word/pos/label
 	jieba.load_userdict("../../data/userdict.txt")
 	f = open(filename,"w")
@@ -29,4 +29,5 @@ def build_crf_data(filename="T.data",_type="T"):
 					f.write(w.word.encode('utf-8')+" "+w.flag.encode("utf-8")+" N\n")
 	f.close()
 
-build_crf_data("V.data",_type="V")
+build_crf_data("train/Train.data",_type="train")
+

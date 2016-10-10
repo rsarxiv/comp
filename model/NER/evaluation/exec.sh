@@ -1,0 +1,1 @@
+./conlleval.pl < output.txt
